@@ -1,0 +1,8 @@
+# Ignore all delve binaries
+**/debug
+
+# Ignore VSCode
+.vscode/
+
+# Ignore Go binary
+deepwork
