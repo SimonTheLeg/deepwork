@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strings"
+	"path"
 
 	homedir "github.com/mitchellh/go-homedir"
 )
@@ -60,28 +60,34 @@ func main() {
 
 func parseConfig(configLocation string) (config, error) {
 	var conf config
+	confDir := path.Dir(configLocation)
+
+	// Try to open config
 	jsonFile, err := os.Open(configLocation)
 	defer jsonFile.Close()
-	if err != nil {
-		// Check if there is already a config file => harmless case, just create default conf
-		if os.IsNotExist(err) {
-			defaultConfig := []byte(`{"affectedApps":["Mail","Calendar"]}`)
 
-			// Create required directories if necessary
-			if err = os.Mkdir(strings.TrimRight(configLocation, "/config.json"), 0744); err != nil {
-				return config{}, fmt.Errorf("Could not create required directories for config: %v", err)
-			}
-			// Write File
-			if err = ioutil.WriteFile(configLocation, defaultConfig, 0644); err != nil {
-				return config{}, fmt.Errorf("Could not write default config: %v", err)
-			}
-			// Call itself again to parse newly created conf
-			return parseConfig(configLocation)
+	// Check if there is a config file at the specified location, if not create a default config
+	if os.IsNotExist(err) {
+		defaultConfig := []byte(`{"affectedApps":["Mail","Calendar"]}`)
+
+		// Create required directories if necessary
+		if err = os.MkdirAll(confDir, 0744); err != nil {
+			return config{}, fmt.Errorf("Could not create required directories for config: %v", err)
 		}
-		// Otherwise (e.g. no permissions on conf file), return the error
-		return config{}, err
+		// Write default config
+		if err = ioutil.WriteFile(configLocation, defaultConfig, 0644); err != nil {
+			return config{}, fmt.Errorf("Could not write default config: %v", err)
+		}
+		// Call itself again to parse newly created conf
+		return parseConfig(configLocation)
 	}
 
+	// Otherwise (e.g. no permissions on conf file or it's dir), return the error
+	if err != nil {
+		return config{}, fmt.Errorf("Could not access config file: %v", err)
+	}
+
+	// Read in the config
 	confByte, err := ioutil.ReadAll(jsonFile)
 
 	if err != nil {
