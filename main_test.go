@@ -52,6 +52,26 @@ func TestParseConfig(t *testing.T) {
 			0300,
 			"/tmp/writeAndExecute/config.json",
 			"no error",
+		}, {
+			"read only",
+			0400,
+			"/tmp/readOnly/config.json",
+			"Could not access config file: open /tmp/readOnly/config.json: permission denied",
+		}, {
+			"read & execute",
+			0500,
+			"/tmp/readAndExecute/config.json",
+			"Could not write default config: open /tmp/readAndExecute/config.json: permission denied",
+		}, {
+			"read & write",
+			0600,
+			"/tmp/readAndWrite/config.json",
+			"Could not access config file: open /tmp/readAndWrite/config.json: permission denied",
+		}, {
+			"all permissions",
+			0700,
+			"/tmp/allPermissions/config.json",
+			"no error",
 		},
 	}
 
