@@ -18,7 +18,7 @@ end tell
 
 	err := ExecuteAppleScript(script)
 
-	return err
+	return fmt.Errorf("Could not open app '%s': '%v'", appName, err)
 }
 
 // CloseApp closes an application using AppleScript
@@ -31,7 +31,7 @@ end tell
 
 	err := ExecuteAppleScript(script)
 
-	return err
+	return fmt.Errorf("Could not close app '%s': '%v'", appName, err)
 }
 
 // ExecuteAppleScript takes in a fully parsed Apple-Script executes the command using osascript

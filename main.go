@@ -53,7 +53,9 @@ func main() {
 	for _, app := range config.AffectedApps {
 		err := action(app)
 		if err != nil {
-			log.Printf("Could not close app %s: %v", app, err)
+			log.Printf("%v", err)
+		}
+	}
 		}
 	}
 }
