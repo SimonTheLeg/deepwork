@@ -6,8 +6,6 @@ import (
 	"strings"
 )
 
-
-
 // OpenApp opens an application using AppleScript
 func OpenApp(appName string) error {
 	script := fmt.Sprintf(`
