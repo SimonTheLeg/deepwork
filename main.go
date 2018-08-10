@@ -35,19 +35,11 @@ func main() {
 
 	// Parse Command Line Flags
 	flag.Parse()
-	desStage := flag.Arg(0)
+	desAction := flag.Arg(0)
 
 	// Determine desired action
 	var action func(name string) error
-	switch desStage {
-	case "on":
-		action = CloseApp
-	case "off":
-		action = OpenApp
-	default:
-		fmt.Println("Usage: deepwork [on,off]")
-		os.Exit(1)
-	}
+	action = determineAction(desAction)
 
 	// Execute action
 	for _, app := range config.AffectedApps {
@@ -56,7 +48,16 @@ func main() {
 			log.Printf("%v", err)
 		}
 	}
-		}
+}
+
+func determineAction(desAction string) func(name string) error {
+	switch desAction {
+	case "on":
+		return CloseApp
+	case "off":
+		return OpenApp
+	default:
+		return nil
 	}
 }
 
