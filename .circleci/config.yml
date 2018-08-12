@@ -24,4 +24,4 @@ jobs:
             go test -v -cover ./... | tee ${TEST_RES_DIR}/go-test.out
             go-junit-report <${TEST_RES_DIR}/go-test.out > ${TEST_RES_DIR}/go-test-report.xml
       - store_test_results:
-          path: ${TEST_RES_DIR}
+          path: /tmp/test-results
