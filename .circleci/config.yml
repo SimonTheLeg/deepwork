@@ -4,16 +4,24 @@ jobs:
     docker:
       - image: circleci/golang:1.10
     working_directory: /go/src/github.com/simontheleg/deepwork
+    environment:
+      TEST_RES_DIR: /tmp/test-results
     steps:
       - checkout
       - run:
           name: Create required dirs
-          command: mkdir /tmp/test-results
+          command: mkdir ${TEST_RES_DIR}
+      # This dependency is required to convert 'go test' results to junit ones, for Circle CI to automatically recognize them
+      - run: 
+          name: Fetch go-junit-report
+          command: go get github.com/jstemmer/go-junit-report
       - run: 
           name: Resolve dependencies with go-get
           command: go get -v -t -d ./...
       - run: 
           name: Run go test
-          command: go test -v -cover ./... | tee /tmp/test-results/unit-test
+          command: |
+            trap "go-junit-report <${${TEST_RES_DIR}}/go-test.out > ${${TEST_RES_DIR}}/go-test-report.xml" EXIT
+            go test -v -cover ./... | tee ${${TEST_RES_DIR}}/go-test.out
       - store_test_results:
-          path: /tmp/test-results
+          path: ${TEST_RES_DIR}
