@@ -6,6 +6,9 @@ jobs:
     working_directory: /go/src/github.com/simontheleg/deepwork
     steps:
       - checkout
+      - run:
+          name: Create required dirs
+          command: mkdir /tmp/test-results
       - run: 
           name: Resolve dependencies with go-get
           command: go get -v -t -d ./...
