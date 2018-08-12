@@ -21,7 +21,7 @@ jobs:
       - run: 
           name: Run go test
           command: |
-            trap "go-junit-report <${${TEST_RES_DIR}}/go-test.out > ${${TEST_RES_DIR}}/go-test-report.xml" EXIT
-            go test -v -cover ./... | tee ${${TEST_RES_DIR}}/go-test.out
+            trap "go-junit-report <${TEST_RES_DIR}/go-test.out > ${TEST_RES_DIR}/go-test-report.xml" EXIT
+            go test -v -cover ./... | tee ${TEST_RES_DIR}/go-test.out
       - store_test_results:
           path: ${TEST_RES_DIR}
