@@ -6,7 +6,7 @@ Currently only working with Mac OS X, more variety to come soon.
 
 ## Set-Up
 
-create a config file under ~/.deepwork/config.json and add the names of all communication applications. An example config can be found in [example-config.json](example-config.json)
+create a config file under ~/.deepwork/config.json and add the names of all communication applications. An example config can be found in [example-config.json](example-config.json). By default Mail and Calendar will be added.
 
 ## Usage
 
