@@ -116,3 +116,23 @@ func TestParseConfig(t *testing.T) {
 		})
 	}
 }
+
+func TestDetermineAction(t *testing.T) {
+	tt := []struct {
+		name      string
+		command   string
+		expResult func(name string) error
+	}{
+		{"Test action On", "on", CloseApp},
+		{"Test action Off", "off", OpenApp},
+		{"Non Valid command", "not-valid-command", nil},
+	}
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			res := determineAction(tc.command)
+			if res != tc.expResult {
+				t.Errorf("Expected a pointer to function: '%v', got '%v'", tc.expResult, &res)
+			}
+		})
+	}
+}
