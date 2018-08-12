@@ -11,4 +11,6 @@ jobs:
           command: go get -v -t -d ./...
       - run: 
           name: Run go test
-          command: go test -v ./...
+          command: go test -v -cover ./... | tee /tmp/test-results/unit-test
+      - store_test_results:
+          path: /tmp/test-results
