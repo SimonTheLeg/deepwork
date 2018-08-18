@@ -56,4 +56,5 @@ jobs:
           name: Publish Release on Github
           command: | 
             VERSION="v0.1.0"
+            chmod +x ./*
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION}-darwin-64 ./
