@@ -33,23 +33,6 @@ jobs:
           command: go build -o ${ARTIFACTS_DIR}
       - persist_to_workspace:
           root: ${ARTIFACTS_DIR}
-            paths:
-              - deepwork
-
-  # release:
-  #   docker:
-  #     - image: simontheleg/github-go-releaser
-  #   branches:
-  #     only:
-  #       - master
-  #       - add-ci
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Build Binary
-  #         command: go install
-  #     - run:
-  #         name: Publish Binary on GitHub
-  #         command: |
-  #           VERSION=$(deepwork version)
+          paths:
+            - ./*
 
