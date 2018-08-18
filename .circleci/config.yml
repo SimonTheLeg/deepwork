@@ -30,7 +30,7 @@ jobs:
           path: /tmp/test-results
       - run:
           name: Build app
-          command: go build -o ${ARTIFACTS_DIR}
+          command: go build -o ${ARTIFACTS_DIR}/deepwork
       - persist_to_workspace:
           root: ${ARTIFACTS_DIR}
           paths:
