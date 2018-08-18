@@ -14,7 +14,7 @@ import (
 
 var configLocation string
 
-const version = "v0.1.0"
+var version = "dev-build"
 
 type config struct {
 	AffectedApps []string `json:"affectedApps"`

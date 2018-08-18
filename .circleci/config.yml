@@ -17,6 +17,7 @@ jobs:
     environment:
       TEST_RES_DIR: /tmp/test-results
       ARTIFACTS_DIR: /tmp/artifacts
+      APP_VERSION: v0.1.1
     steps:
       - checkout
       - run:
@@ -41,8 +42,8 @@ jobs:
       - run:
           name: Build app
           command: | 
-            env GOOS=darwin GOARCH=amd64 go build -o ${ARTIFACTS_DIR}/deepwork-darwin-64
-            env GOOS=linux GOARCH=amd64 go build -o ${ARTIFACTS_DIR}/deepwork-linux-64
+            env GOOS=darwin GOARCH=amd64 go build -o ${ARTIFACTS_DIR}/deepwork-darwin-64 -ldflags "-X main.version=${APP_VERSION}"
+            env GOOS=linux GOARCH=amd64 go build -o ${ARTIFACTS_DIR}/deepwork-linux-64 -ldflags "-X main.version=${APP_VERSION}"
       - persist_to_workspace:
           root: /tmp/artifacts
           paths:
