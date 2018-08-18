@@ -40,7 +40,9 @@ jobs:
           path: /tmp/test-results
       - run:
           name: Build app
-          command: env GOOS=darwin GOARCH=amd64 go build -o ${ARTIFACTS_DIR}/deepwork
+          command: | 
+            env GOOS=darwin GOARCH=amd64 go build -o ${ARTIFACTS_DIR}/deepwork-darwin-64
+            env GOOS=linux GOARCH=amd64 go build -o ${ARTIFACTS_DIR}/deepwork-linux-64
       - persist_to_workspace:
           root: /tmp/artifacts
           paths:
@@ -55,9 +57,5 @@ jobs:
       - run:
           name: Publish Release on Github
           command: | 
-            VERSION="v0.1.0"
-            ls -la
-            chmod +x ./*
-            echo "-----------------------------------"
-            ls -la
+            VERSION=$(./deepwork-linux-64 version)
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION}-darwin-64 ./
