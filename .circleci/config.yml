@@ -1,4 +1,14 @@
 version: 2
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build
+      - publish-github-release:
+          requires:
+            - build
+
 jobs:
   build:
     docker:
@@ -35,4 +45,14 @@ jobs:
           root: ${ARTIFACTS_DIR}
           paths:
             - ./*
+  
+  publish-github-release:
+    docker:
+      - image: simontheleg/github-go-releaser
+    steps:
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Testy
+          command: ls -la
 
