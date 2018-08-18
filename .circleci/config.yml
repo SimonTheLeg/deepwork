@@ -6,12 +6,15 @@ jobs:
     working_directory: /go/src/github.com/simontheleg/deepwork
     environment:
       TEST_RES_DIR: /tmp/test-results
+      ARTIFACTS_DIR: /tmp/artifacts
     steps:
       - checkout
       - run:
           name: Create required dirs
-          command: mkdir ${TEST_RES_DIR}
-      # This dependency is required to convert 'go test' results to junit ones, for Circle CI to automatically recognize them
+          command: | 
+            mkdir ${TEST_RES_DIR}
+            mkdir ${ARTIFACTS_DIR}
+      # This dependency is required to convert 'go test' results to junit ones for Circle CI to automatically recognize them
       - run: 
           name: Fetch go-junit-report
           command: go get github.com/jstemmer/go-junit-report
@@ -25,3 +28,28 @@ jobs:
             go-junit-report <${TEST_RES_DIR}/go-test.out > ${TEST_RES_DIR}/go-test-report.xml
       - store_test_results:
           path: /tmp/test-results
+      - run:
+          name: Build app
+          command: go build -o ${ARTIFACTS_DIR}
+      - persist_to_workspace:
+          root: ${ARTIFACTS_DIR}
+            paths:
+              - deepwork
+
+  # release:
+  #   docker:
+  #     - image: simontheleg/github-go-releaser
+  #   branches:
+  #     only:
+  #       - master
+  #       - add-ci
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Build Binary
+  #         command: go install
+  #     - run:
+  #         name: Publish Binary on GitHub
+  #         command: |
+  #           VERSION=$(deepwork version)
+
