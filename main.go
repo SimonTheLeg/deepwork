@@ -14,6 +14,8 @@ import (
 
 var configLocation string
 
+var version = "dev-build"
+
 type config struct {
 	AffectedApps []string `json:"affectedApps"`
 }
@@ -41,6 +43,10 @@ func main() {
 	var action func(name string) error
 	action = determineAction(desAction)
 
+	if action == nil {
+		os.Exit(0)
+	}
+
 	// Execute action
 	for _, app := range config.AffectedApps {
 		err := action(app)
@@ -56,7 +62,11 @@ func determineAction(desAction string) func(name string) error {
 		return CloseApp
 	case "off":
 		return OpenApp
+	case "version":
+		fmt.Println(version)
+		return nil
 	default:
+		fmt.Println("Usage: deepwork [on,off,version]")
 		return nil
 	}
 }

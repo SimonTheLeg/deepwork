@@ -1,0 +1,67 @@
+version: 2
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build
+      - publish-github-release:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
+
+jobs:
+  
+  build:
+    docker:
+      - image: circleci/golang:1.10
+    working_directory: /go/src/github.com/simontheleg/deepwork
+    environment:
+      TEST_RES_DIR: /tmp/test-results
+      ARTIFACTS_DIR: /tmp/artifacts
+      APP_VERSION: v0.1.1
+    steps:
+      - checkout
+      - run:
+          name: Create required dirs
+          command: | 
+            mkdir ${TEST_RES_DIR}
+            mkdir ${ARTIFACTS_DIR}
+      # This dependency is required to convert 'go test' results to junit ones for Circle CI to automatically recognize them
+      - run: 
+          name: Fetch go-junit-report
+          command: go get github.com/jstemmer/go-junit-report
+      - run: 
+          name: Resolve dependencies with go-get
+          command: go get -v -t -d ./...
+      - run: 
+          name: Run go test
+          command: |
+            go test -v -cover ./... | tee ${TEST_RES_DIR}/go-test.out
+            go-junit-report <${TEST_RES_DIR}/go-test.out > ${TEST_RES_DIR}/go-test-report.xml
+      - store_test_results:
+          path: /tmp/test-results
+      - run:
+          name: Build app
+          command: | 
+            env GOOS=darwin GOARCH=amd64 go build -o ${ARTIFACTS_DIR}/deepwork-darwin-64 -ldflags "-X main.version=${APP_VERSION}"
+            env GOOS=linux GOARCH=amd64 go build -o ${ARTIFACTS_DIR}/deepwork-linux-64 -ldflags "-X main.version=${APP_VERSION}"
+      - persist_to_workspace:
+          root: /tmp/artifacts
+          paths:
+            - ./*
+  
+  publish-github-release:
+    docker:
+      - image: simontheleg/github-go-releaser
+    steps:
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Publish Release on Github
+          command: | 
+            VERSION=$(./deepwork-linux-64 version)
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./
