@@ -8,8 +8,13 @@ workflows:
       - publish-github-release:
           requires:
             - build
+          filters:
+            branches:
+              only:
+                - master
 
 jobs:
+  
   build:
     docker:
       - image: circleci/golang:1.10
