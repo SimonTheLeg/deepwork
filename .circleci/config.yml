@@ -42,7 +42,7 @@ jobs:
           name: Build app
           command: go build -o ${ARTIFACTS_DIR}/deepwork
       - persist_to_workspace:
-          root: ${ARTIFACTS_DIR}
+          root: /tmp/artifacts
           paths:
             - ./*
   
