@@ -16,6 +16,10 @@ end tell
 
 	err := ExecuteAppleScript(script)
 
+	if err == nil {
+		return fmt.Errorf("Successfully opened app: '%s'", appName)
+	}
+
 	return fmt.Errorf("Could not open app '%s': '%v'", appName, err)
 }
 
@@ -28,6 +32,10 @@ end tell
 `, appName)
 
 	err := ExecuteAppleScript(script)
+
+	if err == nil {
+		return fmt.Errorf("Successfully closed app: '%s'", appName)
+	}
 
 	return fmt.Errorf("Could not close app '%s': '%v'", appName, err)
 }

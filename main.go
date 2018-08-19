@@ -51,7 +51,7 @@ func main() {
 	for _, app := range config.AffectedApps {
 		err := action(app)
 		if err != nil {
-			log.Printf("%v", err)
+			fmt.Printf("%v\n", err)
 		}
 	}
 }
