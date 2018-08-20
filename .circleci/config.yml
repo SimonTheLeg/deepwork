@@ -22,7 +22,7 @@ jobs:
     environment:
       TEST_RES_DIR: /tmp/test-results
       ARTIFACTS_DIR: /tmp/artifacts
-      APP_VERSION: v0.1.1
+      APP_VERSION: v0.2.0
     steps:
       - checkout
       - run:

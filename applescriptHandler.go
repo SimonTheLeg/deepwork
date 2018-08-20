@@ -16,7 +16,10 @@ end tell
 
 	err := ExecuteAppleScript(script)
 
-	return fmt.Errorf("Could not open app '%s': '%v'", appName, err)
+	if err != nil {
+		return fmt.Errorf("Could not open app '%s': '%v'", appName, err)
+	}
+	return nil
 }
 
 // CloseApp closes an application using AppleScript
@@ -29,7 +32,10 @@ end tell
 
 	err := ExecuteAppleScript(script)
 
-	return fmt.Errorf("Could not close app '%s': '%v'", appName, err)
+	if err != nil {
+		return fmt.Errorf("Could not close app '%s': '%v'", appName, err)
+	}
+	return nil
 }
 
 // ExecuteAppleScript takes in a fully parsed Apple-Script executes the command using osascript

@@ -40,7 +40,7 @@ func main() {
 	desAction := flag.Arg(0)
 
 	// Determine desired action
-	var action func(name string) error
+	var action (func(name string) error)
 	action = determineAction(desAction)
 
 	if action == nil {
@@ -48,10 +48,25 @@ func main() {
 	}
 
 	// Execute action
+	reschan, errchan := make(chan string), make(chan error)
+
 	for _, app := range config.AffectedApps {
-		err := action(app)
-		if err != nil {
-			log.Printf("%v", err)
+		go func(app string) {
+			err := action(app)
+			if err != nil {
+				errchan <- err
+				return
+			}
+			reschan <- fmt.Sprintf("Successfully opened/closed: '%s'", app)
+		}(app)
+	}
+
+	for i := 0; i < len(config.AffectedApps); i++ {
+		select {
+		case res := <-reschan:
+			fmt.Println(res)
+		case err := <-errchan:
+			fmt.Println(err)
 		}
 	}
 }
