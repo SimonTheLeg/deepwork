@@ -47,6 +47,19 @@ func main() {
 		os.Exit(0)
 	}
 
+	// Handle Notification Center
+	switch desAction {
+	case "on":
+		err = TurnDoNotDisturbOn()
+	case "off":
+		err = TurnDoNotDisturbOff()
+	}
+
+	if err != nil {
+		fmt.Printf("Could not change Do Not Disturb State: %v\n", err)
+	} else {
+		fmt.Println("Successfully changed Do Not Disturb State")
+	}
 	// Execute action
 	reschan, errchan := make(chan string), make(chan error)
 
