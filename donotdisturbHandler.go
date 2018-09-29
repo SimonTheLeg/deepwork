@@ -51,3 +51,25 @@ func TurnDoNotDisturbOn() error {
 
 	return nil
 }
+
+// TurnDoNotDisturbOff turns off Do Not Disturb on Mac OS X
+func TurnDoNotDisturbOff() error {
+
+	// Disable Do Not Disturb Mode
+	cmd := exec.Command("bash", "-c", "defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean false")
+
+	_, err := cmd.CombinedOutput()
+
+	if err != nil {
+		return err
+	}
+
+	// Restart Notification Center
+	err = restartNotificationCenter()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

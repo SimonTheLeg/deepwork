@@ -51,6 +51,8 @@ func main() {
 	switch desAction {
 	case "on":
 		err = TurnDoNotDisturbOn()
+	case "off":
+		err = TurnDoNotDisturbOff()
 	}
 
 	if err != nil {
