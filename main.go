@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 
+	handlers "deepwork/handlers"
 	homedir "github.com/mitchellh/go-homedir"
 )
 
@@ -50,9 +51,9 @@ func main() {
 	// Handle Notification Center
 	switch desAction {
 	case "on":
-		err = TurnDoNotDisturbOn()
+		err = handlers.TurnDoNotDisturbOn()
 	case "off":
-		err = TurnDoNotDisturbOff()
+		err = handlers.TurnDoNotDisturbOff()
 	}
 
 	if err != nil {
@@ -87,9 +88,9 @@ func main() {
 func determineAction(desAction string) func(name string) error {
 	switch desAction {
 	case "on":
-		return CloseApp
+		return handlers.CloseApp
 	case "off":
-		return OpenApp
+		return handlers.OpenApp
 	case "version":
 		fmt.Println(version)
 		return nil
