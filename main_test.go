@@ -116,3 +116,39 @@ func TestParseConfig(t *testing.T) {
 		})
 	}
 }
+
+func TestDetermineActions(t *testing.T) {
+	// Test Default Case
+	if determineActions("") != nil {
+		t.Errorf("Calling determineActions with no parameters, should return nil")
+	}
+
+	if determineActions("does-not-exist") != nil {
+		t.Errorf("Calling determinActions with an invalid parameter, should return nil")
+	}
+
+	// Test Version Case
+	if determineActions("version") != nil {
+		t.Errorf("Calling determinActions with the version flag, should return nil")
+	}
+
+	// Set Up some sample apps
+	curConfig.AffectedApps = []string{
+		"Calendar",
+		"Messages",
+	}
+
+	// Test On Case
+	res := determineActions("on")
+
+	if len(res) != len(curConfig.AffectedApps)+1 { //plus 1 for Notification Center
+		t.Errorf("len res %d, len curConfig %d", len(res), len(curConfig.AffectedApps))
+	}
+
+	// Test Off Case
+	res = determineActions("off")
+
+	if len(res) != len(curConfig.AffectedApps)+1 { //plus 1 for Notification Center
+		t.Errorf("len res %d, len curConfig %d", len(res), len(curConfig.AffectedApps))
+	}
+}
