@@ -7,39 +7,48 @@ import (
 )
 
 // OpenApp opens an application using AppleScript
-func OpenApp(appName string) error {
-	script := fmt.Sprintf(`
+func OpenApp(appName string, reschan chan string, errchan chan error) func() {
+	return func() {
+		script := fmt.Sprintf(`
 tell application "%s"
 	activate
 end tell
 `, appName)
 
-	err := ExecuteAppleScript(script)
+		err := executeAppleScript(script)
 
-	if err != nil {
-		return fmt.Errorf("Could not open app '%s': '%v'", appName, err)
+		if err != nil {
+			errchan <- fmt.Errorf("Could not open app '%s': '%v'", appName, err)
+			return
+		}
+
+		reschan <- fmt.Sprintf("Successfully opened app: '%s'", appName)
+		return
 	}
-	return nil
 }
 
 // CloseApp closes an application using AppleScript
-func CloseApp(appName string) error {
-	script := fmt.Sprintf(`
+func CloseApp(appName string, reschan chan string, errchan chan error) func() {
+	return func() {
+		script := fmt.Sprintf(`
 tell application "%s"
 	quit
 end tell
-`, appName)
+		`, appName)
 
-	err := ExecuteAppleScript(script)
+		err := executeAppleScript(script)
 
-	if err != nil {
-		return fmt.Errorf("Could not close app '%s': '%v'", appName, err)
+		if err != nil {
+			errchan <- fmt.Errorf("Could not close app '%s': '%v'", appName, err)
+			return
+		}
+		reschan <- fmt.Sprintf("Successfully closed app: '%s'", appName)
+		return
 	}
-	return nil
 }
 
-// ExecuteAppleScript takes in a fully parsed Apple-Script executes the command using osascript
-func ExecuteAppleScript(command string) error {
+// executeAppleScript takes in a fully parsed Apple-Script and executes the command using osascript
+func executeAppleScript(command string) error {
 	cmd := exec.Command("osascript", "-e", command)
 
 	output, err := cmd.CombinedOutput()
