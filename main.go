@@ -26,7 +26,7 @@ var reschan = make(chan string)
 var errchan = make(chan error)
 
 func main() {
-	// Get Users homedirectory
+	// Get Users homedirectory to set the configLocation
 	configLocation, err := homedir.Dir()
 	if err != nil {
 		log.Fatalf("Could not determine users home directory: %v", err)
@@ -49,20 +49,6 @@ func main() {
 
 	if actions == nil {
 		os.Exit(0)
-	}
-
-	// Handle Notification Center
-	switch desAction {
-	case "on":
-		err = handlers.TurnDoNotDisturbOn()
-	case "off":
-		err = handlers.TurnDoNotDisturbOff()
-	}
-
-	if err != nil {
-		fmt.Printf("Could not change Do Not Disturb State: %v\n", err)
-	} else {
-		fmt.Println("Successfully changed Do Not Disturb State")
 	}
 
 	// Execute all actions in parallel
@@ -89,11 +75,15 @@ func determineActions(desAction string) []func() {
 		for _, app := range curConfig.AffectedApps {
 			actions = append(actions, handlers.CloseApp(app, reschan, errchan))
 		}
+		// Handle Notification Center
+		actions = append(actions, handlers.TurnDoNotDisturbOn(reschan, errchan))
 	case "off":
 		// Handle Apps
 		for _, app := range curConfig.AffectedApps {
 			actions = append(actions, handlers.OpenApp(app, reschan, errchan))
 		}
+		// Handle Notification Center
+		actions = append(actions, handlers.TurnDoNotDisturbOff(reschan, errchan))
 	case "version":
 		fmt.Println(version)
 		return nil
