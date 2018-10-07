@@ -9,8 +9,6 @@ import (
 	"os"
 	"path"
 
-	handlers "deepwork/handlers"
-
 	homedir "github.com/mitchellh/go-homedir"
 )
 
@@ -73,17 +71,17 @@ func determineActions(desAction string) []func() {
 	case "on":
 		// Handle Apps
 		for _, app := range curConfig.AffectedApps {
-			actions = append(actions, handlers.CloseApp(app, reschan, errchan))
+			actions = append(actions, CloseApp(app, reschan, errchan))
 		}
 		// Handle Notification Center
-		actions = append(actions, handlers.TurnDoNotDisturbOn(reschan, errchan))
+		actions = append(actions, TurnDoNotDisturbOn(reschan, errchan))
 	case "off":
 		// Handle Apps
 		for _, app := range curConfig.AffectedApps {
-			actions = append(actions, handlers.OpenApp(app, reschan, errchan))
+			actions = append(actions, OpenApp(app, reschan, errchan))
 		}
 		// Handle Notification Center
-		actions = append(actions, handlers.TurnDoNotDisturbOff(reschan, errchan))
+		actions = append(actions, TurnDoNotDisturbOff(reschan, errchan))
 	case "version":
 		fmt.Println(version)
 		return nil
