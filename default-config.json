@@ -1,7 +1,7 @@
 {
   "affectedApps": [
     "Mail",
-    "Rocket.Chat+",
     "Calendar"
-  ]
+  ],
+  "notificationCenter": true
 }

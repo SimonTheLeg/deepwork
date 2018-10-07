@@ -12,16 +12,19 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 )
 
-var configLocation string
-
-var version = "dev-build"
-
 type config struct {
 	AffectedApps []string `json:"affectedApps"`
 }
 
+var version = "dev-build"
+var defaultConfig = []byte(`{"affectedApps":["Mail","Calendar"]}`)
+
+var curConfig config
+var reschan = make(chan string)
+var errchan = make(chan error)
+
 func main() {
-	// Get Users homedirectory
+	// Get Users homedirectory to set the configLocation
 	configLocation, err := homedir.Dir()
 	if err != nil {
 		log.Fatalf("Could not determine users home directory: %v", err)
@@ -29,7 +32,7 @@ func main() {
 	configLocation += "/.deepwork/config.json"
 
 	// Parse Configuration
-	config, err := parseConfig(configLocation)
+	curConfig, err = parseConfig(configLocation)
 
 	if err != nil {
 		log.Fatalf("Could not parse config file: %v", err)
@@ -39,42 +42,19 @@ func main() {
 	flag.Parse()
 	desAction := flag.Arg(0)
 
-	// Determine desired action
-	var action (func(name string) error)
-	action = determineAction(desAction)
+	// Determine desired actions
+	actions := determineActions(desAction)
 
-	if action == nil {
+	if actions == nil {
 		os.Exit(0)
 	}
 
-	// Handle Notification Center
-	switch desAction {
-	case "on":
-		err = TurnDoNotDisturbOn()
-	case "off":
-		err = TurnDoNotDisturbOff()
+	// Execute all actions in parallel
+	for _, action := range actions {
+		go action()
 	}
 
-	if err != nil {
-		fmt.Printf("Could not change Do Not Disturb State: %v\n", err)
-	} else {
-		fmt.Println("Successfully changed Do Not Disturb State")
-	}
-	// Execute action
-	reschan, errchan := make(chan string), make(chan error)
-
-	for _, app := range config.AffectedApps {
-		go func(app string) {
-			err := action(app)
-			if err != nil {
-				errchan <- err
-				return
-			}
-			reschan <- fmt.Sprintf("Successfully opened/closed: '%s'", app)
-		}(app)
-	}
-
-	for i := 0; i < len(config.AffectedApps); i++ {
+	for i := 0; i < len(actions); i++ {
 		select {
 		case res := <-reschan:
 			fmt.Println(res)
@@ -84,12 +64,24 @@ func main() {
 	}
 }
 
-func determineAction(desAction string) func(name string) error {
+func determineActions(desAction string) []func() {
+	var actions []func()
+
 	switch desAction {
 	case "on":
-		return CloseApp
+		// Handle Apps
+		for _, app := range curConfig.AffectedApps {
+			actions = append(actions, CloseApp(app, reschan, errchan))
+		}
+		// Handle Notification Center
+		actions = append(actions, TurnDoNotDisturbOn(reschan, errchan))
 	case "off":
-		return OpenApp
+		// Handle Apps
+		for _, app := range curConfig.AffectedApps {
+			actions = append(actions, OpenApp(app, reschan, errchan))
+		}
+		// Handle Notification Center
+		actions = append(actions, TurnDoNotDisturbOff(reschan, errchan))
 	case "version":
 		fmt.Println(version)
 		return nil
@@ -97,6 +89,7 @@ func determineAction(desAction string) func(name string) error {
 		fmt.Println("Usage: deepwork [on,off,version]")
 		return nil
 	}
+	return actions
 }
 
 func parseConfig(configLocation string) (config, error) {
@@ -109,8 +102,6 @@ func parseConfig(configLocation string) (config, error) {
 
 	// Check if there is a config file at the specified location, if not create a default config
 	if os.IsNotExist(err) {
-		defaultConfig := []byte(`{"affectedApps":["Mail","Calendar"]}`)
-
 		// Create required directories if necessary
 		if err = os.MkdirAll(confDir, 0744); err != nil {
 			return config{}, fmt.Errorf("Could not create required directories for config: %v", err)
