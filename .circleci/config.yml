@@ -1,5 +1,14 @@
 version: 2
 
+references:
+  app_name: &app_name deepwork
+  app_version: &app_version v0.6.1
+  artifacts_dir: &artifacts_dir /tmp/artifacts
+  testres_dir: &testres_dir /tmp/test-results
+  attach_artifacts: &attach_artifacts
+    attach_workspace:
+      at: *artifacts_dir
+
 workflows:
   version: 2
   main:
@@ -13,55 +22,49 @@ workflows:
               only:
                 - master
 
-jobs:
-  
+jobs:  
   build:
     docker:
-      - image: circleci/golang:1.10
-    working_directory: /go/src/github.com/simontheleg/deepwork
+      - image: circleci/golang:1.12
     environment:
-      TEST_RES_DIR: /tmp/test-results
-      ARTIFACTS_DIR: /tmp/artifacts
-      APP_VERSION: v0.5.1
+      TEST_RES_DIR: *testres_dir
+      ARTIFACTS_DIR: *artifacts_dir
+      APP_VERSION: *app_version
     steps:
       - checkout
-      - run:
-          name: Create required dirs
-          command: | 
-            mkdir ${TEST_RES_DIR}
-            mkdir ${ARTIFACTS_DIR}
       # This dependency is required to convert 'go test' results to junit ones for Circle CI to automatically recognize them
       - run: 
           name: Fetch go-junit-report
           command: go get github.com/jstemmer/go-junit-report
       - run: 
-          name: Resolve dependencies with go-get
-          command: go get -v -t -d ./...
-      - run: 
           name: Run go test
           command: |
+            mkdir ${TEST_RES_DIR}
             go test -v -cover ./... | tee ${TEST_RES_DIR}/go-test.out
             go-junit-report <${TEST_RES_DIR}/go-test.out > ${TEST_RES_DIR}/go-test-report.xml
       - store_test_results:
-          path: /tmp/test-results
+          path: *testres_dir
       - run:
           name: Build app
           command: | 
+            mkdir ${ARTIFACTS_DIR}
             env GOOS=darwin GOARCH=amd64 go build -o ${ARTIFACTS_DIR}/deepwork-darwin-64 -ldflags "-X main.version=${APP_VERSION}"
             env GOOS=linux GOARCH=amd64 go build -o ${ARTIFACTS_DIR}/deepwork-linux-64 -ldflags "-X main.version=${APP_VERSION}"
       - persist_to_workspace:
-          root: /tmp/artifacts
+          root: *artifacts_dir
           paths:
             - ./*
   
   publish-github-release:
     docker:
       - image: simontheleg/github-go-releaser
+    environment:
+      APP_NAME: *app_name
+      APP_VERSION: *app_version
     steps:
-      - attach_workspace:
-          at: ./
+      - *attach_artifacts
       - run:
-          name: Publish Release on Github
-          command: | 
-            VERSION=$(./deepwork-linux-64 version)
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./
+          name: Publish Release to Github
+          command: |
+            echo "Releasing version ${APP_VERSION}"
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${APP_VERSION} ./artifacts
