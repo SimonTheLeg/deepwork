@@ -31,14 +31,10 @@ end tell
 func CloseApp(appName string, reschan chan string, errchan chan error) func() {
 	return func() {
 		script := fmt.Sprintf(`
-if exists application "%s" then
-  tell application "%s"
-    quit
-  end tell
-else
-  error "could not close app '%s, because it cannot be found" 
-end if 
-		`, appName, appName, appName)
+tell application "%s"
+	quit
+end tell
+`, appName)
 
 		err := executeAppleScript(script)
 
