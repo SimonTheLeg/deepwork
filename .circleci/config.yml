@@ -61,10 +61,11 @@ jobs:
     environment:
       APP_NAME: *app_name
       APP_VERSION: *app_version
+      ARTIFACTS_DIR: *artifacts_dir
     steps:
       - *attach_artifacts
       - run:
           name: Publish Release to Github
           command: |
             echo "Releasing version ${APP_VERSION}"
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${APP_VERSION} ./artifacts
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${APP_VERSION} ${ARTIFACTS_DIR}
