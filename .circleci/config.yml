@@ -6,7 +6,8 @@ references:
   artifacts_dir: &artifacts_dir /tmp/artifacts
   testres_dir: &testres_dir /tmp/test-results
   attach_artifacts: &attach_artifacts
-    at: *artifacts_dir
+    attach_workspace:
+      at: *artifacts_dir
 
 workflows:
   version: 2
