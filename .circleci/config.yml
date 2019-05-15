@@ -2,7 +2,7 @@ version: 2
 
 references:
   app_name: &app_name deepwork
-  app_version: &app_version v0.6.1
+  app_version: &app_version v0.6.2
   artifacts_dir: &artifacts_dir /tmp/artifacts
   testres_dir: &testres_dir /tmp/test-results
   attach_artifacts: &attach_artifacts
