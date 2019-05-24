@@ -30,3 +30,14 @@ Open up all communication apps again
 ```shell
 deepwork off
 ```
+
+## Develop
+
+### Build with Bazel
+
+To build with bazel simply run the following
+
+```shell
+bazel run //:gazelle -- update-repos -from_file=go.mod
+bazel build //:deepwork
+```
